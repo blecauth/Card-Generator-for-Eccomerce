@@ -5,167 +5,182 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador de Canecas</title>
   <style>
-    /* Estilos (Mantidos) */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
     body {
-      background: #0d0d0d;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
+      background: #0d0d0d; color: #fff; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; padding: 2rem;
     }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: #25D366;
-    }
-
+    h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #25D366; }
     form {
-      background: #181818;
-      padding: 1.5rem;
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 550px;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      background: #181818; padding: 1.5rem; border-radius: 1rem;
+      width: 100%; max-width: 550px; display: flex; flex-direction: column;
+      gap: 1rem; box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
-
     label { font-size: 0.95rem; color: #ccc; display: block; margin-bottom: 0.3rem; }
     input, textarea, select {
-      width: 100%;
-      padding: 0.7rem;
-      border-radius: 6px;
-      border: 1px solid #333;
-      background: #0f0f0f;
-      color: #fff;
-      font-size: 0.95rem;
+      width: 100%; padding: 0.7rem; border-radius: 6px; border: 1px solid #333;
+      background: #0f0f0f; color: #fff; font-size: 0.95rem;
     }
-
     textarea { resize: vertical; }
-
     .cores-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      display: flex; flex-wrap: wrap; gap: 10px;
     }
-
     .cores-container label {
-      background: #0f0f0f;
-      padding: 6px 10px;
-      border: 1px solid #333;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
+      background: #0f0f0f; padding: 6px 10px; border: 1px solid #333;
+      border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;
     }
-
     .cores-container input { display: none; }
-
     .cores-container input:checked + span {
-      background: #25D366;
-      color: #fff;
-      border-color: #25D366;
+      background: #25D366; color: #fff; border-color: #25D366;
       box-shadow: 0 0 10px rgba(37,211,102,0.5);
-      border-radius: 6px;
-      padding: 5px 10px;
+      border-radius: 6px; padding: 5px 10px;
     }
-
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
     button {
       background: linear-gradient(90deg, #25D366, #1ebe5f);
-      color: #fff;
-      border: none;
-      padding: 0.8rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      margin-top: 0.5rem;
+      color: #fff; border: none; padding: 0.8rem;
+      border-radius: 8px; cursor: pointer; font-size: 1rem;
+      font-weight: bold; transition: all 0.3s ease; 
     }
-
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(37,211,102,0.6);
+    button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(37,211,102,0.6); }
+    
+    /* Estilo para o botão de prévia */
+    #visualizarPreview {
+        background: linear-gradient(90deg, #007bff, #0056b3);
+    }
+    #visualizarPreview:hover {
+        box-shadow: 0 0 20px rgba(0,123,255,0.6);
     }
 
     .output {
-      margin-top: 2rem;
-      width: 100%;
-      max-width: 600px;
-      background: #111;
-      padding: 1rem;
-      border-radius: 8px;
-      font-family: monospace;
-      color: #0f0;
-      white-space: pre-wrap;
-      overflow-x: auto;
-      border: 1px solid #333;
+      margin-top: 2rem; width: 100%; max-width: 600px;
+      background: #111; padding: 1rem; border-radius: 8px;
+      font-family: monospace; color: #0f0; white-space: pre-wrap;
+      overflow-x: auto; border: 1px solid #333;
     }
-
     .copy-btn {
-      margin-top: 0.5rem;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s ease;
+      margin-top: 0.5rem; background: #007bff; color: #fff;
+      border: none; padding: 0.6rem 1rem; border-radius: 6px;
+      cursor: pointer; transition: background 0.3s ease;
     }
-
     .copy-btn:hover { background: #0056b3; }
+    .imagem-modelo-input { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid #333; }
 
-    /* Pré-visualização */
-    .preview {
-      margin-top: 2rem;
-      width: 100%;
-      max-width: 300px;
-      background: #181818;
+    /* 🔔 Notificação visual */
+    .notificacao {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #25D366;
+      color: #000;
+      padding: 1rem 1.5rem;
       border-radius: 10px;
-      padding: 1rem;
+      font-weight: 600;
+      box-shadow: 0 0 20px rgba(37, 211, 102, 0.6);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 999;
+    }
+    .notificacao.mostrar {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 🖼️ Estilos do MODAL DE PREVIEW */
+    .modal {
+        display: none; /* Escondido por padrão */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.8); 
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #181818;
+        margin: 5% auto; /* 5% do topo e centralizado */
+        padding: 20px;
+        border: 1px solid #444;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 10px;
+        position: relative;
+    }
+
+    .modal-content h3 {
+        color: #25D366;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #fff;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    /* 🎨 Estilos para simular o Card dentro do Modal (Mantenha se quiser) */
+    #previewContent .item {
+      background: #0d0d0d; 
+      padding: 1rem; 
+      border-radius: 8px; 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      gap: 1rem; 
+      margin-bottom: 1rem;
+      border: 1px solid #444;
       text-align: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
-    .preview img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-bottom: 0.8rem;
-      object-fit: contain;
+    #previewContent .item img {
+      width: 100px; 
+      height: 100px; 
+      object-fit: cover; 
+      border-radius: 4px;
     }
-    .preview h2 {
-      font-size: 1.2rem;
-      color: #25D366;
+    #previewContent .item .info h2 {
+      font-size: 1.2rem; 
+      color: #25D366; 
+      margin-bottom: 0.3rem;
     }
-    .preview p {
-      font-size: 0.9rem;
-      color: #ccc;
-      margin-top: 0.2rem;
+    #previewContent .item .info p {
+      font-size: 0.9rem; 
+      color: #ccc; 
+      line-height: 1.4;
     }
-    .preview button {
-      margin-top: 0.8rem;
-      background: linear-gradient(90deg, #25D366, #1ebe5f);
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
+    #previewContent .open-modal-btn {
+      /* Estilo de um botão dentro do card */
+      background: #007bff;
+      padding: 0.5rem 1rem; 
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
     }
-    /* Estilo para inputs de imagem dos modelos */
-    .imagem-modelo-input {
-        margin-top: 1rem;
-        padding-top: 0.8rem;
-        border-top: 1px solid #333;
-    }
+
   </style>
 </head>
 <body>
-
   <h1>Gerador de Canecas 🖋️</h1>
 
   <form id="geradorForm">
@@ -173,17 +188,14 @@
       <label>ID do Produto:</label>
       <input type="text" id="idProduto" placeholder="Ex: CN001" required>
     </div>
-
     <div>
       <label>Nome da Caneca:</label>
       <input type="text" id="nome" placeholder="Ex: Caneca Coração" required>
     </div>
-
     <div>
       <label>Descrição:</label>
       <textarea id="descricao" placeholder="Ex: Material: Cerâmica; Capacidade: 325ml; Estampa: Coração" required></textarea>
     </div>
-    
     <div>
       <label>Categoria:</label>
       <select id="categoria" required>
@@ -200,7 +212,6 @@
         <option value="futebol">Futebol</option>
       </select>
     </div>
-
     <div>
       <label>Modelos/Cores disponíveis:</label>
       <div class="cores-container" id="coresContainer">
@@ -216,212 +227,185 @@
         <label><input type="checkbox" value="Azul Escuro"><span>Azul Escuro</span></label>
       </div>
     </div>
-    
+
     <div id="imagemModelosContainer"></div>
-
-    <button type="submit">Gerar Código</button>
+    
+    <div class="button-group">
+        <button type="submit">Gerar Código</button>
+        <button type="button" id="inserirIndex">Inserir no index.html</button>
+        <button type="button" id="visualizarPreview">Prévia do Card (Modal)</button> </div>
   </form>
-
-  <div id="preview" class="preview" style="display:none;">
-    <img id="previewImage" src="" alt="Prévia">
-    <h2 id="previewNome"></h2>
-    <p id="previewId"></p>
-    <p id="previewPreco"></p>
-    <button>Ver Detalhes</button>
-  </div>
 
   <div id="resultado" class="output" style="display:none;"></div>
   <button id="copiar" class="copy-btn" style="display:none;">Copiar Código</button>
 
+  <div id="notificacao" class="notificacao">✅ Produto adicionado com sucesso!</div>
+  
+  <div id="previewModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Prévia do Card do Produto</h3>
+      <div id="previewContent">
+        </div>
+    </div>
+  </div>
   <script>
     const form = document.getElementById('geradorForm');
-    const resultado = document.getElementById('resultado');
-    const copiarBtn = document.getElementById('copiar');
-    const preview = document.getElementById('preview');
     const coresContainer = document.getElementById('coresContainer');
     const imagemModelosContainer = document.getElementById('imagemModelosContainer');
+    const resultado = document.getElementById('resultado');
+    const copiarBtn = document.getElementById('copiar');
+    const inserirIndexBtn = document.getElementById('inserirIndex');
+    const visualizarPreviewBtn = document.getElementById('visualizarPreview'); // NOVO
+    const notificacao = document.getElementById('notificacao');
     
-    // Elementos da pré-visualização
-    const previewNome = document.getElementById('previewNome');
-    const previewId = document.getElementById('previewId');
-    const previewPreco = document.getElementById('previewPreco');
-    const previewImage = document.getElementById('previewImage');
+    // Elementos do Modal
+    const previewModal = document.getElementById('previewModal'); // NOVO
+    const previewContent = document.getElementById('previewContent'); // NOVO
+    const closeModalBtn = document.getElementsByClassName('close')[0]; // NOVO
 
     function atualizarCamposDeImagem() {
-        const coresSelecionadas = Array.from(coresContainer.querySelectorAll('input:checked')).map(i => i.value);
-        imagemModelosContainer.innerHTML = "";
-        
-        // Se houver pelo menos um modelo selecionado, mostra os campos individuais
-        if (coresSelecionadas.length > 0) {
-            coresSelecionadas.forEach(cor => {
-                const safeCor = cor.replace(/\s/g, '_');
-                
-                const div = document.createElement('div');
-                div.className = 'imagem-modelo-input';
-                
-                const labelModelo = document.createElement('label');
-                labelModelo.innerHTML = `Opções para o Modelo "<strong>${cor}</strong>":`;
-                div.appendChild(labelModelo);
-
-                // 1. Input para Preço
-                const divPreco = document.createElement('div');
-                divPreco.style.marginBottom = '10px';
-                const labelPreco = document.createElement('label');
-                labelPreco.textContent = `Preço (R$):`;
-                const inputPreco = document.createElement('input');
-                inputPreco.type = 'number';
-                inputPreco.step = '0.01';
-                inputPreco.name = `precoModelo_${safeCor}`;
-                inputPreco.placeholder = `Preço da caneca ${cor}...`;
-                inputPreco.required = true;
-                
-                divPreco.appendChild(labelPreco);
-                divPreco.appendChild(inputPreco);
-                div.appendChild(divPreco);
-
-
-                // 2. Input para Link da Imagem
-                const divImagem = document.createElement('div');
-                const labelImagem = document.createElement('label');
-                labelImagem.textContent = `Link da Imagem:`;
-                const inputImagem = document.createElement('input');
-                inputImagem.type = 'url';
-                inputImagem.name = `imagemModelo_${safeCor}`;
-                inputImagem.placeholder = `URL da imagem para a caneca ${cor}...`;
-                inputImagem.required = true;
-                divImagem.appendChild(labelImagem);
-                divImagem.appendChild(inputImagem);
-                div.appendChild(divImagem);
-
-                imagemModelosContainer.appendChild(div);
-            });
-        }
-    }
-
-    // Atualiza a prévia baseada no primeiro modelo selecionado
-    form.addEventListener('input', () => {
-      const nome = document.getElementById('nome').value.trim();
-      const id = document.getElementById('idProduto').value.trim();
-      
       const coresSelecionadas = Array.from(coresContainer.querySelectorAll('input:checked')).map(i => i.value);
-      
-      let precoModelo = "";
-      let imagemModelo = "";
-
-      if (coresSelecionadas.length > 0) {
-          const safeCor = coresSelecionadas[0].replace(/\s/g, '_');
-          const inputPreco = document.querySelector(`input[name="precoModelo_${safeCor}"]`);
-          const inputImagem = document.querySelector(`input[name="imagemModelo_${safeCor}"]`);
-          
-          if (inputPreco && inputPreco.value) precoModelo = parseFloat(inputPreco.value).toFixed(2);
-          if (inputImagem) imagemModelo = inputImagem.value.trim();
-      }
-
-      // Atualiza a prévia
-      if (imagemModelo) {
-        previewImage.src = imagemModelo;
-        previewImage.style.display = "block";
-      } else {
-        previewImage.src = "";
-        previewImage.style.display = "none";
-      }
-
-      previewNome.textContent = nome || "Nome da Caneca";
-      previewId.textContent = id ? `ID: ${id}` : "";
-      previewPreco.textContent = precoModelo ? `R$ ${precoModelo.replace('.', ',')}` : "";
-
-      preview.style.display = nome || precoModelo || imagemModelo ? "block" : "none";
-    });
+      imagemModelosContainer.innerHTML = "";
+      coresSelecionadas.forEach(cor => {
+        const safeCor = cor.replace(/\s/g, '_');
+        const div = document.createElement('div');
+        div.className = 'imagem-modelo-input';
+        div.innerHTML = `
+          <label>Modelo "${cor}"</label>
+          <label>Preço (R$):</label>
+          <input type="number" step="0.01" name="precoModelo_${safeCor}" required>
+          <label>Link da Imagem:</label>
+          <input type="url" name="imagemModelo_${safeCor}" placeholder="URL da imagem..." required>
+        `;
+        imagemModelosContainer.appendChild(div);
+      });
+    }
 
     coresContainer.addEventListener('change', atualizarCamposDeImagem);
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-
+    function gerarCodigo() {
       const id = document.getElementById('idProduto').value.trim();
       const nome = document.getElementById('nome').value.trim();
       const descricao = document.getElementById('descricao').value.trim();
       const categoria = document.getElementById('categoria').value;
       const coresSelecionadas = Array.from(document.querySelectorAll('.cores-container input:checked')).map(i => i.value);
 
-      // NOVO: Validação para garantir que pelo menos um modelo foi selecionado
-      if (coresSelecionadas.length === 0) {
-          return alert('Selecione pelo menos um Modelo/Cor disponível para gerar o código.');
+      if (!id || !nome || !descricao || !categoria || coresSelecionadas.length === 0) {
+        alert('Preencha todos os campos e selecione pelo menos uma cor.');
+        return null;
       }
-      if (!nome || !descricao || !categoria) return alert('Por favor, preencha todos os campos obrigatórios.');
 
-      let optionsArray = []; 
-      let allValid = true;
-
-      // 1. Geração e Validação de TODAS as Opções
-      coresSelecionadas.forEach(cor => {
-          const safeCor = cor.replace(/\s/g, '_');
-          const inputImagemModelo = document.querySelector(`input[name="imagemModelo_${safeCor}"]`);
-          const inputPrecoModelo = document.querySelector(`input[name="precoModelo_${safeCor}"]`);
-          
-          const imagemModelo = inputImagemModelo ? inputImagemModelo.value.trim() : null;
-          const precoModeloValue = inputPrecoModelo ? parseFloat(inputPrecoModelo.value) : null;
-          const precoModelo = precoModeloValue !== null && !isNaN(precoModeloValue) ? precoModeloValue.toFixed(2) : null;
-          
-          // Validação de campos dinâmicos (todos os selecionados devem ter preço e imagem)
-          if (!imagemModelo || !precoModelo) {
-              alert(`Preencha o link de imagem e o preço válidos para o modelo "${cor}".`);
-              allValid = false;
-              return;
-          }
-
-          optionsArray.push({
-              model: cor,
-              price: precoModelo,
-              image: imagemModelo
-          });
+      const optionsArray = coresSelecionadas.map(cor => {
+        const safeCor = cor.replace(/\s/g, '_');
+        const preco = document.querySelector(`input[name="precoModelo_${safeCor}"]`).value || 0;
+        const imagem = document.querySelector(`input[name="imagemModelo_${safeCor}"]`).value.trim();
+        return { model: cor, price: parseFloat(preco), image: imagem };
       });
 
-      if (!allValid) return; // Se a validação falhar, para a função.
+      const primeiraImagem = optionsArray[0].image;
+      const precoExibido = optionsArray[0].price.toFixed(2).replace('.', ',');
 
-      // 2. Definir Preço/Imagem para a Galeria (SEMPRE é o primeiro item do optionsArray)
-      const primeiroModelo = optionsArray[0];
-      
-      const imagemParaGaleria = primeiroModelo.image;
-      const precoExibidoNaGaleria = primeiroModelo.price.replace('.', ',');
-
-      // 3. Gerar string options para data-options
-      const optionsString = optionsArray.map(opt => 
-          `{"model":"${opt.model}","price":${opt.price},"image":"${opt.image}"}`
-      ).join(',\n        ');
-
-      // 4. Gerar o Código Final
       const codigo = `
 <div class="item" data-categoria="${categoria}">
-  <img src="${imagemParaGaleria}" alt="${nome}">
+  <img src="${primeiraImagem}" alt="${nome}">
   <div class="info">
     <h2>${nome}</h2>
     <p>ID: ${id}</p>
-    <p>R$ ${precoExibidoNaGaleria}</p>
+    <p>R$ ${precoExibido}</p>
     <button class="open-modal-btn"
       data-name="${nome}"
       data-id="${id}"
-      data-image="${imagemParaGaleria}"
+      data-image="${primeiraImagem}"
       data-specs="${descricao}"
-      data-options='[
-        ${optionsString}
-      ]'>Ver Detalhes</button>
+      data-options='${JSON.stringify(optionsArray)}'>
+      Ver Detalhes
+    </button>
   </div>
 </div>`.trim();
 
+      // EXIBE O CÓDIGO FONTE na área de output
       resultado.style.display = 'block';
       copiarBtn.style.display = 'inline-block';
-      resultado.textContent = codigo;
+      resultado.textContent = codigo; // Mantido como textContent para exibir o código fonte
+      resultado.setAttribute('data-copy-content', codigo); 
+      
+      return codigo;
+    }
+
+    // Função para abrir o modal de prévia
+    function abrirPreviewModal() {
+        const card = gerarCodigo();
+        if (!card) return;
+
+        // Injeta o código HTML do card no conteúdo do modal
+        previewContent.innerHTML = card; 
+        previewModal.style.display = "block";
+    }
+
+    // Função para fechar o modal
+    function fecharPreviewModal() {
+        previewModal.style.display = "none";
+    }
+
+    // Event Listeners
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      // Ao submeter, apenas gera e exibe o código fonte na área de output
+      gerarCodigo(); 
     });
 
     copiarBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(resultado.textContent);
+      const codigoFonte = resultado.getAttribute('data-copy-content') || resultado.textContent;
+      navigator.clipboard.writeText(codigoFonte);
       copiarBtn.textContent = 'Copiado ✅';
       setTimeout(() => copiarBtn.textContent = 'Copiar Código', 2000);
     });
 
-    // Chama a função ao carregar para garantir a lógica inicial
-    atualizarCamposDeImagem(); 
+    visualizarPreviewBtn.addEventListener('click', abrirPreviewModal); // NOVO EVENTO
+
+    closeModalBtn.addEventListener('click', fecharPreviewModal); // FECHAR AO CLICAR NO 'x'
+    
+    // Fechar o modal clicando fora dele
+    window.addEventListener('click', (event) => {
+        if (event.target == previewModal) {
+            fecharPreviewModal();
+        }
+    });
+
+    function mostrarNotificacao(mensagem) {
+      notificacao.textContent = mensagem;
+      notificacao.classList.add('mostrar');
+      setTimeout(() => notificacao.classList.remove('mostrar'), 3000);
+    }
+
+    inserirIndexBtn.addEventListener('click', async () => {
+      const card = gerarCodigo();
+      if (!card) return;
+      try {
+        const [fileHandle] = await window.showOpenFilePicker({
+          types: [{ description: "HTML Files", accept: { "text/html": [".html"] } }],
+          multiple: false
+        });
+        const file = await fileHandle.getFile();
+        let content = await file.text();
+
+        const inicioSection = content.indexOf('<section class="galeria">');
+        if (inicioSection !== -1) {
+          const posicaoInsercao = content.indexOf('>', inicioSection) + 1;
+          const novoConteudo = content.slice(0, posicaoInsercao) + "\n" + card + "\n" + content.slice(posicaoInsercao);
+          const writable = await fileHandle.createWritable();
+          await writable.write(novoConteudo);
+          await writable.close();
+          mostrarNotificacao("✅ Produto adicionado no topo da galeria!");
+        } else {
+          mostrarNotificacao("❌ Não foi possível encontrar a <section class='galeria'> no arquivo index.html");
+        }
+      } catch (err) {
+        console.error(err);
+        mostrarNotificacao("⚠️ Ação cancelada ou não suportada pelo navegador.");
+      }
+    });
   </script>
 </body>
 </html>
