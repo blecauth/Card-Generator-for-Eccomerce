@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dashboard</title>
+    <title>Hub de Gerenciamento de Cards</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
         body {
@@ -13,8 +13,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 2rem;
+            text-align: center;
         }
         h1 {
             font-size: 2.5rem;
@@ -27,17 +27,17 @@
             font-size: 1.1rem;
         }
         .dashboard {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            width: 90%;
+            max-width: 1200px;
         }
         .card-link {
             text-decoration: none;
             color: inherit;
             display: block;
-            width: 280px;
-            padding: 30px;
+            padding: 25px;
             background: #181818;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
@@ -48,56 +48,75 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
         }
-        
         .card-link h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
+            min-height: 40px;
         }
         .card-link p {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             margin-bottom: 0;
             color: #aaa;
+            text-align: left;
         }
-
-        /* Cores de destaque para os links */
-        .card-link.gerador:hover {
-            border-left-color: #25D366; /* Verde do Gerador */
-        }
-        .card-link.gerador h2 {
-            color: #25D366;
-        }
-
-        .card-link.editor:hover {
-            border-left-color: #007bff; /* Azul do Editor */
-        }
-        .card-link.editor h2 {
-            color: #007bff;
-        }
-
-        /* Ícones usando emojis para simplicidade */
         .icon {
             margin-right: 10px;
             font-size: 1.8rem;
             line-height: 1;
         }
+
+        /* Cores dos Cards */
+        .card-link.gerador:hover { border-left-color: #25D366; }
+        .card-link.gerador h2 { color: #25D366; }
+        .card-link.editor:hover { border-left-color: #007bff; }
+        .card-link.editor h2 { color: #007bff; }
+        .card-link.utilidade:hover { border-left-color: #f0c000; }
+        .card-link.utilidade h2 { color: #f0c000; }
+        .card-link.analise:hover { border-left-color: #dc3545; }
+        .card-link.analise h2 { color: #dc3545; }
     </style>
 </head>
 <body>
-    <h1>Hub de Gerenciamento</h1>
-    <p>Selecione a ferramenta que deseja utilizar.</p>
+    <h1>Hub de Gerenciamento de Conteúdo</h1>
+    <p>Ferramentas essenciais para o seu catálogo de produtos.</p>
 
     <div class="dashboard">
 
         <a href="gerador.html" class="card-link gerador">
-            <h2><span class="icon">✨</span> Gerador de Novos Cards</h2>
-            <p>Use esta ferramenta para criar um novo produto (card) do zero e inseri-lo no seu index.html.</p>
+            <h2><span class="icon">✨</span> Gerador de Cards</h2>
+            <p>Cria um novo produto e o insere no index.html. Possui upload ImgBB.</p>
         </a>
 
         <a href="editor.html" class="card-link editor">
-            <h2><span class="icon">✏️</span> Editor de Cards Existentes</h2>
-            <p>Carregue o index.html para visualizar, editar ou excluir os cards de produtos já cadastrados.</p>
+            <h2><span class="icon">✏️</span> Editor de Cards</h2>
+            <p>Carrega o index.html para editar/excluir produtos existentes de forma segura.</p>
+        </a>
+        
+        <a href="reorganizador.html" class="card-link utilidade">
+            <h2><span class="icon">↕️</span> Reorganizador de Cards</h2>
+            <p>Permite arrastar e soltar os cards da galeria para mudar a ordem de exibição.</p>
+        </a>
+        
+        <a href="editor_geral.html" class="card-link editor">
+            <h2><span class="icon">🌐</span> Editor de Metadados/Geral</h2>
+            <p>Edita o título da página, descrição (SEO) e outros textos fixos do seu index.html.</p>
+        </a>
+
+        <a href="utilidades_arquivo.html" class="card-link utilidade">
+            <h2><span class="icon">💾</span> Backup & Limpeza</h2>
+            <p>Cria um backup seguro do arquivo e remove espaços/linhas desnecessárias da galeria.</p>
+        </a>
+
+        <a href="relatorios.html" class="card-link analise">
+            <h2><span class="icon">📊</span> Relatórios e Stats</h2>
+            <p>Gera estatísticas do seu catálogo: contagem por categoria, preços min/máx, etc.</p>
+        </a>
+
+        <a href="checker_imagens.html" class="card-link analise">
+            <h2><span class="icon">⚠️</span> Imagens Quebradas</h2>
+            <p>Verifica todos os links de imagem dos cards para encontrar URLs quebradas.</p>
         </a>
 
     </div>
