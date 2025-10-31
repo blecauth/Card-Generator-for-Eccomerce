@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de Imagens Quebradas</title>
+    <style>
+        /* (Estilos básicos) */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+        body { background: #0d0d0d; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #dc3545; }
+        .container { background: #181818; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 800px; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+        button { background: linear-gradient(90deg, #dc3545, #c82333); color: #fff; border: none; padding: 0.7rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: all 0.3s ease; margin-top: 15px; }
+        button:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(220, 53, 69, 0.6); }
+
+        #resultList { list-style: none; margin-top: 2rem; padding: 1rem; background: #222; border-radius: 6px; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #333; }
+        .result-item:last-child { border-bottom: none; }
+        .status-ok { color: #25D366; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .notificacao { position: fixed; bottom: 30px; right: 30px; background: #25D366; color: #000; padding: 1rem 1.5rem; border-radius: 10px; font-weight: 600; box-shadow: 0 0 20px rgba(37, 211, 102, 0.6); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; z-index: 999; }
+        .notificacao.mostrar { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <h1>Verificador de Imagens Quebradas ⚠️</h1>
+    <div class="container">
+        <button id="carregarIndexBtn">1. Selecionar Arquivo e Checar Imagens</button>
+        <p id="status" style="color: #f0c000; margin-top: 1rem;">Aguardando o carregamento do arquivo...</p>
+        <p style="font-size: 0.9em; color: #ccc;">Nota: O navegador pode bloquear a verificação se o servidor da imagem não permitir (erro CORS).</p>
+
+        <ul id="resultList">
+            </ul>
+    </div>
+
+    <div id="notificacao" class="notificacao"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const resultList = document.getElementById('resultList');
+
+        function mostrarNotificacao(mensagem, sucesso = true) {
+            const notificacao = document.getElementById('notificacao');
+            notificacao.textContent = mensagem;
+            notificacao.style.background = sucesso ? '#25D366' : '#dc3545';
+            notificacao.classList.add('mostrar');
+            setTimeout(() => notificacao.classList.remove('mostrar'), 3000);
+        }
+
+        function extrairCards(htmlContent) {
+            const galeriaSectionRegex = /<section class="galeria">([\s\S]*?)<\/section>/;
+            const match = htmlContent.match(galeriaSectionRegex);
+            if (!match) return [];
+            const galeriaContent = match[1];
+            const cardRegex = /(<div\s+class="item"[\s\S]*?<\/div>\s*<\/div>)/g;
+            const cardMatches = [...galeriaContent.matchAll(cardRegex)];
+            return cardMatches.map(m => m[0].trim());
+        }
+
+        function parseCardData(cardHtml) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cardHtml;
+            const card = tempDiv.querySelector('.item');
+            if (!card) return null;
+            const button = card.querySelector('button.open-modal-btn');
+            const img = card.querySelector('img');
+            
+            let optionsArray = [];
+            try {
+                optionsArray = JSON.parse(button.getAttribute('data-options'));
+            } catch (e) { /* ignore */ }
+
+            let urls = new Set();
+            if (img && img.src) urls.add(img.src);
+
+            optionsArray.forEach(option => {
+                if (option.image) urls.add(option.image);
+            });
+            
+            return {
+                nome: button ? button.getAttribute('data-name') : 'Nome Desconhecido',
+                id: button ? button.getAttribute('data-id') : 'ID Desconhecido',
+                urls: Array.from(urls)
+            };
+        }
+        
+        // Testa a URL de forma eficiente (usando HEAD)
+        async function checkImageUrl(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
+                return response.ok; // True se for status 200-299
+            } catch (error) {
+                // Erros CORS ou rede
+                return false;
+            }
+        }
+
+        async function checarImagens() {
+            resultList.innerHTML = '';
+            
+            try {
+                const [handle] = await window.showOpenFilePicker({ types: [{ description: "HTML Files (index.html)", accept: { "text/html": [".html"] } }] });
+                const file = await handle.getFile();
+                const content = await file.text();
+
+                const extractedCards = extrairCards(content);
+                if (extractedCards.length === 0) {
+                    statusEl.textContent = "Nenhum card encontrado na galeria.";
+                    return;
+                }
+
+                statusEl.textContent = `Verificando ${extractedCards.length} cards... Aguarde.`;
+
+                let brokenCount = 0;
+                let promises = [];
+
+                extractedCards.forEach((cardHtml, index) => {
+                    const cardData = parseCardData(cardHtml);
+                    
+                    cardData.urls.forEach(url => {
+                        promises.push((async () => {
+                            const isOk = await checkImageUrl(url);
+                            const listItem = document.createElement('li');
+                            listItem.className = 'result-item';
+                            if (!isOk) {
+                                brokenCount++;
+                            }
+                            listItem.innerHTML = `
+                                <span>${isOk ? '🟢' : '🔴'} ${cardData.nome} (ID: ${cardData.id}) - URL: <a href="${url}" target="_blank" style="color: inherit;">${url.substring(0, 70)}...</a></span>
+                                <span class="${isOk ? 'status-ok' : 'status-error'}">${isOk ? 'OK' : 'QUEBRADA'}</span>
+                            `;
+                            resultList.appendChild(listItem);
+                        })());
+                    });
+                });
+                
+                await Promise.all(promises);
+
+                statusEl.textContent = `Verificação concluída. ${brokenCount} links de imagem quebrados encontrados.`;
+                if (brokenCount > 0) {
+                    mostrarNotificacao(`⚠️ ${brokenCount} links quebrados encontrados.`, false);
+                } else {
+                    mostrarNotificacao("✅ Todas as imagens parecem estar funcionando!");
+                }
+
+            } catch (err) {
+                console.error("Erro na verificação:", err);
+                statusEl.textContent = "Aguardando o carregamento do arquivo...";
+                mostrarNotificacao("⚠️ Erro ao carregar ou ação cancelada.", false);
+            }
+        }
+
+        document.getElementById('carregarIndexBtn').addEventListener('click', checarImagens);
+    </script>
+</body>
+</html>
