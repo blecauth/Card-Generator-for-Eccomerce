@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Relatórios</title>
+    <style>
+        /* (Estilos básicos) */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+        body { background: #0d0d0d; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #dc3545; }
+        .container { background: #181818; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 800px; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+        button { background: linear-gradient(90deg, #dc3545, #c82333); color: #fff; border: none; padding: 0.7rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: all 0.3s ease; margin-top: 15px; }
+        button:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(220, 53, 69, 0.6); }
+
+        #relatorioOutput { margin-top: 2rem; padding: 1rem; background: #222; border-radius: 6px; }
+        #relatorioOutput h2 { color: #f0c000; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 10px; }
+        #relatorioOutput p { margin-bottom: 5px; }
+        .stat-line { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #333; }
+        .stat-line:last-child { border-bottom: none; }
+        .stat-value { font-weight: bold; color: #25D366; }
+
+        .notificacao { position: fixed; bottom: 30px; right: 30px; background: #25D366; color: #000; padding: 1rem 1.5rem; border-radius: 10px; font-weight: 600; box-shadow: 0 0 20px rgba(37, 211, 102, 0.6); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; z-index: 999; }
+        .notificacao.mostrar { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Relatórios 📊</h1>
+
+    <div class="container">
+        <button id="carregarIndexBtn">1. Selecionar e Gerar Relatório</button>
+        <p id="status" style="color: #f0c000; margin-top: 1rem;">Aguardando o carregamento do arquivo...</p>
+
+        <div id="relatorioOutput" style="display:none;">
+            <h2>Estatísticas Gerais do Catálogo</h2>
+            <div id="statsContainer"></div>
+            
+            <h2>Contagem por Categoria</h2>
+            <div id="categoryContainer"></div>
+        </div>
+    </div>
+
+    <div id="notificacao" class="notificacao"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const relatorioOutput = document.getElementById('relatorioOutput');
+        const statsContainer = document.getElementById('statsContainer');
+        const categoryContainer = document.getElementById('categoryContainer');
+
+        function mostrarNotificacao(mensagem, sucesso = true) {
+            const notificacao = document.getElementById('notificacao');
+            notificacao.textContent = mensagem;
+            notificacao.style.background = sucesso ? '#25D366' : '#dc3545';
+            notificacao.classList.add('mostrar');
+            setTimeout(() => notificacao.classList.remove('mostrar'), 3000);
+        }
+
+        function extrairCards(htmlContent) {
+            const galeriaSectionRegex = /<section class="galeria">([\s\S]*?)<\/section>/;
+            const match = htmlContent.match(galeriaSectionRegex);
+            if (!match) return [];
+            const galeriaContent = match[1];
+            const cardRegex = /(<div\s+class="item"[\s\S]*?<\/div>\s*<\/div>)/g;
+            const cardMatches = [...galeriaContent.matchAll(cardRegex)];
+            return cardMatches.map(m => m[0].trim());
+        }
+
+        function parseCardData(cardHtml) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cardHtml;
+            const card = tempDiv.querySelector('.item');
+            if (!card) return null;
+            const button = card.querySelector('button.open-modal-btn');
+            
+            let optionsArray = [];
+            try {
+                optionsArray = JSON.parse(button.getAttribute('data-options'));
+            } catch (e) {
+                console.error("Erro ao parsear options para o relatório:", e);
+            }
+
+            // O preço principal exibido é o do primeiro modelo
+            const price = optionsArray.length > 0 ? optionsArray[0].price : 0;
+
+            return {
+                categoria: card.getAttribute('data-categoria'),
+                nome: button.getAttribute('data-name'),
+                id: button.getAttribute('data-id'),
+                price: price
+            };
+        }
+        
+        function formatCurrency(value) {
+            return `R$ ${value.toFixed(2).replace('.', ',')}`;
+        }
+
+        async function gerarRelatorio() {
+            statsContainer.innerHTML = '';
+            categoryContainer.innerHTML = '';
+            relatorioOutput.style.display = 'none';
+
+            try {
+                const [handle] = await window.showOpenFilePicker({ types: [{ description: "HTML Files (index.html)", accept: { "text/html": [".html"] } }] });
+                const file = await handle.getFile();
+                const content = await file.text();
+
+                const extractedCards = extrairCards(content);
+                if (extractedCards.length === 0) {
+                    statusEl.textContent = "Nenhum card encontrado na galeria.";
+                    mostrarNotificacao("⚠️ Nenhum card encontrado na galeria.", false);
+                    return;
+                }
+
+                let stats = {
+                    totalCards: extractedCards.length,
+                    categorias: {},
+                    precoMin: Infinity,
+                    precoMax: -Infinity,
+                    nomeMin: '',
+                    nomeMax: ''
+                };
+                
+                extractedCards.forEach(cardHtml => {
+                    const data = parseCardData(cardHtml);
+                    if (!data) return;
+
+                    // Contagem por Categoria
+                    stats.categorias[data.categoria] = (stats.categorias[data.categoria] || 0) + 1;
+
+                    // Preço Min/Max (usa o preço de exibição do primeiro modelo)
+                    if (data.price < stats.precoMin) {
+                        stats.precoMin = data.price;
+                        stats.nomeMin = data.nome;
+                    }
+                    if (data.price > stats.precoMax) {
+                        stats.precoMax = data.price;
+                        stats.nomeMax = data.nome;
+                    }
+                });
+
+                // Renderizar Estatísticas Gerais
+                statsContainer.innerHTML += `<div class="stat-line"><span>Total de Cards:</span> <span class="stat-value">${stats.totalCards}</span></div>`;
+                statsContainer.innerHTML += `<div class="stat-line"><span>Produto de Menor Preço (Exibição):</span> <span class="stat-value">${stats.nomeMin} (${formatCurrency(stats.precoMin)})</span></div>`;
+                statsContainer.innerHTML += `<div class="stat-line"><span>Produto de Maior Preço (Exibição):</span> <span class="stat-value">${stats.nomeMax} (${formatCurrency(stats.precoMax)})</span></div>`;
+                
+                // Renderizar Contagem por Categoria
+                const categoriasOrdenadas = Object.entries(stats.categorias).sort((a, b) => b[1] - a[1]);
+                categoriasOrdenadas.forEach(([categoria, count]) => {
+                    categoryContainer.innerHTML += `<div class="stat-line"><span>${categoria}:</span> <span class="stat-value">${count}</span></div>`;
+                });
+
+
+                statusEl.textContent = `Relatório gerado com sucesso.`;
+                relatorioOutput.style.display = 'block';
+                mostrarNotificacao("✅ Relatório gerado!");
+
+            } catch (err) {
+                console.error("Erro ao gerar relatório:", err);
+                statusEl.textContent = "Aguardando o carregamento do arquivo...";
+                mostrarNotificacao("⚠️ Erro ao carregar ou ação cancelada.", false);
+            }
+        }
+
+        document.getElementById('carregarIndexBtn').addEventListener('click', gerarRelatorio);
+    </script>
+</body>
+</html>
