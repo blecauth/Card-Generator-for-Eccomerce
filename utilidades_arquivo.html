@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilitários de Arquivo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+        body { background: #0d0d0d; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+        h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #f0c000; }
+        .container { background: #181818; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 600px; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+        .action-group { margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; }
+        h2 { color: #f0c000; margin-bottom: 1rem; font-size: 1.5rem; }
+        button { background: linear-gradient(90deg, #f0c000, #d4a700); color: #000; border: none; padding: 0.7rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: all 0.3s ease; margin-top: 10px; }
+        button:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(240, 192, 0, 0.6); }
+        #status { color: #ccc; margin-top: 10px; }
+        .notificacao { position: fixed; bottom: 30px; right: 30px; background: #25D366; color: #000; padding: 1rem 1.5rem; border-radius: 10px; font-weight: 600; box-shadow: 0 0 20px rgba(37, 211, 102, 0.6); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; z-index: 999; }
+        .notificacao.mostrar { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <h1>Backup e Limpeza de Arquivo 💾</h1>
+
+    <div class="container">
+        <p id="status">Aguardando seleção do arquivo...</p>
+
+        <div class="action-group">
+            <h2>1. Backup Completo</h2>
+            <p>Cria uma cópia do seu `index.html` com data e hora. **É recomendado antes de qualquer alteração grande.**</p>
+            <button id="backupIndexBtn">Selecionar Arquivo e Salvar Backup</button>
+        </div>
+
+        <div class="action-group">
+            <h2>2. Limpeza/Otimização da Galeria</h2>
+            <p>Remove linhas vazias e espaços em excesso dentro da `&lt;section class="galeria"&gt;`, reduzindo o tamanho do arquivo.</p>
+            <button id="otimizarIndexBtn">Limpar e Otimizar Galeria no index.html</button>
+        </div>
+    </div>
+
+    <div id="notificacao" class="notificacao"></div>
+
+    <script>
+        function mostrarNotificacao(mensagem, sucesso = true) {
+            const notificacao = document.getElementById('notificacao');
+            notificacao.textContent = mensagem;
+            notificacao.style.background = sucesso ? '#25D366' : '#dc3545';
+            notificacao.classList.add('mostrar');
+            setTimeout(() => notificacao.classList.remove('mostrar'), 3000);
+        }
+
+        async function obterArquivo() {
+            try {
+                const [handle] = await window.showOpenFilePicker({ 
+                    types: [{ description: "HTML Files (index.html)", accept: { "text/html": [".html"] } }] 
+                });
+                const file = await handle.getFile();
+                const content = await file.text();
+                return { handle, content };
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error("Erro ao abrir arquivo:", err);
+                    mostrarNotificacao("⚠️ Erro ao abrir ou ação cancelada.", false);
+                }
+                return null;
+            }
+        }
+
+        document.getElementById('backupIndexBtn').addEventListener('click', async () => {
+            const fileData = await obterArquivo();
+            if (!fileData) return;
+            
+            const { content } = fileData;
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
+            const backupFileName = `index_backup_${timestamp}.html`;
+
+            try {
+                // Usa showSaveFilePicker para escolher onde salvar o backup
+                const saveHandle = await window.showSaveFilePicker({
+                    suggestedName: backupFileName,
+                    types: [{ description: "HTML Backup File", accept: { "text/html": [".html"] } }]
+                });
+
+                const writable = await saveHandle.createWritable();
+                await writable.write(content);
+                await writable.close();
+                mostrarNotificacao(`💾 Backup salvo como "${backupFileName}"!`);
+            } catch (err) {
+                console.error("Erro ao salvar backup:", err);
+                mostrarNotificacao("❌ Erro ao salvar o arquivo de backup.", false);
+            }
+        });
+
+        document.getElementById('otimizarIndexBtn').addEventListener('click', async () => {
+            const fileData = await obterArquivo();
+            if (!fileData) return;
+            
+            const { handle, content } = fileData;
+            let novoConteudo = content;
+            let otimizado = false;
+
+            // Regex para encontrar o conteúdo da seção galeria
+            const galeriaSectionRegex = /(<section class="galeria">)([\s\S]*?)(<\/section>)/;
+            const match = novoConteudo.match(galeriaSectionRegex);
+
+            if (match) {
+                const prefixo = match[1];
+                let galeriaContent = match[2];
+                const sufixo = match[3];
+
+                // 1. Remove linhas vazias (incluindo espaços e tabs)
+                galeriaContent = galeriaContent.replace(/^\s*[\r\n]/gm, '');
+                
+                // 2. Remove espaços extras antes/depois de tags (com cuidado para não minificar o texto interno)
+                galeriaContent = galeriaContent.replace(/>\s+</g, '><');
+
+                // Reconstroi o HTML completo
+                novoConteudo = prefixo + galeriaContent + sufixo;
+                otimizado = true;
+            } else {
+                mostrarNotificacao("❌ Não foi possível encontrar a <section class='galeria'> para otimizar.", false);
+                return;
+            }
+
+            try {
+                const writable = await handle.createWritable();
+                await writable.write(novoConteudo);
+                await writable.close();
+                mostrarNotificacao(`✅ Galeria limpa e otimizada! Tamanho reduzido (se aplicável).`);
+            } catch (err) {
+                console.error("Erro ao salvar otimizado:", err);
+                mostrarNotificacao("❌ Erro ao salvar o arquivo otimizado. Verifique permissões.", false);
+            }
+        });
+    </script>
+</body>
+</html>
