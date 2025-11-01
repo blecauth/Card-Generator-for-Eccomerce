@@ -27,7 +27,7 @@
     <h1>Gerador de Mockup de Canecas ☕</h1>
 
     <div class="container">
-        <p style="color: #f0c000; margin-bottom: 15px;">A imagem base de duas canecas foi carregada automaticamente.</p>
+        <p style="color: #f0c000; margin-bottom: 15px;">A imagem base de canecas será carregada do arquivo local: **mug_template.jpg**.</p>
 
         <div class="input-group">
             <label for="designFile">1. Selecione a ARTE (Estampa) para aplicar:</label>
@@ -51,21 +51,20 @@
         // ------------------------------------------------------------------
         // CONFIGURAÇÕES NECESSÁRIAS
         // ------------------------------------------------------------------
+        // **ATENÇÃO: Substitua esta chave pela sua Chave de API do ImgBB**
         const API_KEY_IMG_BB = "bb49178e11dff4322b7a699167535e57"; 
         
-        // URL da imagem de template fornecida pelo usuário
-        const MUG_TEMPLATE_URL = "https://i.ibb.co/hK5XjT0/mug-template-user.jpg"; 
+        // CORREÇÃO: Usa a referência do arquivo local, o que resolve o erro CORS.
+        const MUG_TEMPLATE_URL = "mug_template.jpg"; 
 
         // ------------------------------------------------------------------
-        // COORDENADAS AJUSTADAS PARA A IMAGEM FORNECIDA
+        // COORDENADAS AJUSTADAS PARA A IMAGEM FORNECIDA (1400x933)
         // [X_inicial, Y_inicial, Largura_final, Altura_final, Opacidade]
         // ------------------------------------------------------------------
         const MUG_MAPPING = [
             // Caneca 1 (Alça para Esquerda - área de estampa visível na direita do objeto)
-            // Ajustado para a imagem: X, Y, Largura, Altura
             { x: 340, y: 350, w: 250, h: 250, opacity: 0.95 }, 
             // Caneca 2 (Alça para Direita - área de estampa visível na esquerda do objeto)
-            // Ajustado para a imagem: X, Y, Largura, Altura
             { x: 910, y: 350, w: 250, h: 250, opacity: 0.95 }
         ];
         // ------------------------------------------------------------------
@@ -88,19 +87,17 @@
             setTimeout(() => notificacao.classList.remove('mostrar'), 3000);
         }
 
-        // 1. Carregar o Template Base
+        // 1. Carregar o Template Base (Local)
         templateImage.onload = function() {
             canvas.width = templateImage.width;
             canvas.height = templateImage.height;
-            // Oculta o canvas até a geração
             document.getElementById('mockupCanvas').style.display = 'none';
-            // Mensagem de status
-            mostrarNotificacao("✅ Imagem base de canecas carregada.", true);
+            mostrarNotificacao("✅ Imagem base de canecas carregada (Local).", true);
         };
         templateImage.onerror = function() {
-            mostrarNotificacao("❌ Erro ao carregar a imagem de template. Verifique a URL.", false);
+            mostrarNotificacao("❌ Erro ao carregar a imagem de template. Certifique-se de que 'mug_template.jpg' está na mesma pasta.", false);
         }
-        templateImage.crossOrigin = "anonymous"; // Necessário para imagens externas no canvas
+        // Removemos a crossOrigin, pois não é necessária para arquivos locais e evita o erro CORS.
         templateImage.src = MUG_TEMPLATE_URL;
 
 
@@ -117,7 +114,6 @@
 
             mostrarNotificacao("Gerando o mockup...", true);
             
-            // Cria um URL temporário para a arte carregada
             const reader = new FileReader();
             reader.onload = function(e) {
                 designImage.onload = function() {
@@ -127,16 +123,12 @@
 
                     // Desenha a arte em cada caneca com as coordenadas definidas
                     MUG_MAPPING.forEach((map, index) => {
-                        // Salva o estado atual (para restaurar a opacidade e outras configs)
                         ctx.save(); 
-                        
-                        // Aplica opacidade para simular a tinta na caneca
                         ctx.globalAlpha = map.opacity || 0.95; 
                         
-                        // Desenha a arte na posição e tamanho definidos no MUG_MAPPING
+                        // Desenha a arte na posição e tamanho definidos (x, y, w, h)
                         ctx.drawImage(designImage, map.x, map.y, map.w, map.h);
 
-                        // Restaura o estado original do canvas
                         ctx.restore(); 
                     });
 
