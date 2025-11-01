@@ -28,9 +28,10 @@
 
     <div class="container">
         <p style="color: #f0c000; margin-bottom: 15px;">A imagem base de canecas será carregada do arquivo local: **mug_template.jpg**.</p>
+        <p style="color: #f0c000; margin-bottom: 15px;">**IMPORTANTE:** Selecione a imagem completa da arte (frente e verso lado a lado) para que seja dividida e aplicada corretamente.</p>
 
         <div class="input-group">
-            <label for="designFile">1. Selecione a ARTE (Estampa) para aplicar:</label>
+            <label for="designFile">1. Selecione a ARTE COMPLETA (Frente e Verso) para aplicar:</label>
             <input type="file" id="designFile" accept="image/*">
         </div>
 
@@ -58,13 +59,16 @@
         const MUG_TEMPLATE_URL = "mug_template.jpg"; 
 
         // ------------------------------------------------------------------
-        // COORDENADAS AJUSTADAS PARA A IMAGEM FORNECIDA (1400x933)
-        // [X_inicial, Y_inicial, Largura_final, Altura_final, Opacidade]
+        // COORDENADAS AJUSTADAS PARA A IMAGEM FORNECIDA (1400x933 do template)
+        // Estas coordenadas agora se referem à área ONDE a metade da estampa será DESENHADA.
+        // x_destino, y_destino, largura_destino, altura_destino
         // ------------------------------------------------------------------
         const MUG_MAPPING = [
             // Caneca 1 (Alça para Esquerda - área de estampa visível na direita do objeto)
+            // Ajuste fino para a imagem de template 1400x933
             { x: 340, y: 350, w: 250, h: 250, opacity: 0.95 }, 
             // Caneca 2 (Alça para Direita - área de estampa visível na esquerda do objeto)
+            // Ajuste fino para a imagem de template 1400x933
             { x: 910, y: 350, w: 250, h: 250, opacity: 0.95 }
         ];
         // ------------------------------------------------------------------
@@ -97,7 +101,6 @@
         templateImage.onerror = function() {
             mostrarNotificacao("❌ Erro ao carregar a imagem de template. Certifique-se de que 'mug_template.jpg' está na mesma pasta.", false);
         }
-        // Removemos a crossOrigin, pois não é necessária para arquivos locais e evita o erro CORS.
         templateImage.src = MUG_TEMPLATE_URL;
 
 
@@ -121,17 +124,38 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
 
-                    // Desenha a arte em cada caneca com as coordenadas definidas
-                    MUG_MAPPING.forEach((map, index) => {
-                        ctx.save(); 
-                        ctx.globalAlpha = map.opacity || 0.95; 
-                        
-                        // Desenha a arte na posição e tamanho definidos (x, y, w, h)
-                        ctx.drawImage(designImage, map.x, map.y, map.w, map.h);
+                    // Divide a imagem da arte em duas metades
+                    const arteLargura = designImage.width;
+                    const arteAltura = designImage.height;
+                    const metadeLargura = arteLargura / 2;
 
-                        ctx.restore(); 
-                    });
+                    // Desenha a PRIMEIRA METADE (Frente) na Caneca 1
+                    // drawImage(imagem, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+                    // sx, sy, sWidth, sHeight = área de recorte na imagem de ORIGEM
+                    // dx, dy, dWidth, dHeight = área de destino no CANVAS
+                    ctx.save(); 
+                    ctx.globalAlpha = MUG_MAPPING[0].opacity; 
+                    ctx.drawImage(
+                        designImage, 
+                        0, 0, // Início do recorte (topo esquerdo da imagem da arte)
+                        metadeLargura, arteAltura, // Tamanho do recorte (metade da largura, altura total)
+                        MUG_MAPPING[0].x, MUG_MAPPING[0].y, // Posição de destino no canvas
+                        MUG_MAPPING[0].w, MUG_MAPPING[0].h // Tamanho de destino no canvas
+                    );
+                    ctx.restore(); 
 
+                    // Desenha a SEGUNDA METADE (Verso) na Caneca 2
+                    ctx.save(); 
+                    ctx.globalAlpha = MUG_MAPPING[1].opacity; 
+                    ctx.drawImage(
+                        designImage, 
+                        metadeLargura, 0, // Início do recorte (metade da largura, topo)
+                        metadeLargura, arteAltura, // Tamanho do recorte (metade da largura, altura total)
+                        MUG_MAPPING[1].x, MUG_MAPPING[1].y, // Posição de destino no canvas
+                        MUG_MAPPING[1].w, MUG_MAPPING[1].h // Tamanho de destino no canvas
+                    );
+                    ctx.restore(); 
+                    
                     // Mostra o resultado
                     document.getElementById('mockupCanvas').style.display = 'block';
                     uploadMockupBtn.style.display = 'inline-block';
@@ -144,7 +168,7 @@
         
         // 3. Lógica de Upload do Mockup Final para ImgBB
         async function uploadMockup() {
-            if (API_KEY_IMG_BB === "SUA_CHAVE_API_AQUI") {
+            if (API_KEY_IMG_BB === "bb49178e11dff4322b7a699167535e57") {
                 mostrarNotificacao("ERRO: Configure a Chave de API do ImgBB.", false);
                 return;
             }
@@ -152,7 +176,6 @@
             mostrarNotificacao("Enviando Mockup final para ImgBB...", true);
             uploadMockupBtn.disabled = true;
 
-            // Converte o Canvas em um Blob (formato de arquivo)
             canvas.toBlob(async function(blob) {
                 const formData = new FormData();
                 formData.append("image", blob, "mockup_final.png");
