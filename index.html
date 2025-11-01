@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hub de Gerenciamento de Cards</title>
+    <title>Hub de Gerenciamento de Conteúdo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
         body {
@@ -68,44 +68,74 @@
         }
 
         /* Cores dos Cards */
-        .card-link.gerador:hover { border-left-color: #25D366; }
-        .card-link.gerador h2 { color: #25D366; }
-        .card-link.editor:hover { border-left-color: #007bff; }
-        .card-link.editor h2 { color: #007bff; }
+        /* Grupo de Criação */
+        .card-link.criacao:hover { border-left-color: #25D366; }
+        .card-link.criacao h2 { color: #25D366; }
+        
+        /* Grupo de Edição */
+        .card-link.edicao:hover { border-left-color: #007bff; }
+        .card-link.edicao h2 { color: #007bff; }
+
+        /* Grupo de Utilitários e Arquivo */
         .card-link.utilidade:hover { border-left-color: #f0c000; }
         .card-link.utilidade h2 { color: #f0c000; }
+        
+        /* Grupo de Análise e QA */
         .card-link.analise:hover { border-left-color: #dc3545; }
         .card-link.analise h2 { color: #dc3545; }
     </style>
 </head>
 <body>
     <h1>Hub de Gerenciamento de Conteúdo</h1>
-    <p>Ferramentas essenciais para o seu catálogo de produtos.</p>
+    <p>Ferramentas essenciais para a gestão do seu catálogo de produtos.</p>
 
     <div class="dashboard">
 
-    <a href="gerador.html" class="card-link gerador">
-        <h2><span class="icon">✨</span> Gerador de Cards</h2>
-        <p>Cria um novo produto e o insere no index.html. Possui upload ImgBB.</p>
-    </a>
-    <a href="editor.html" class="card-link editor">
-        <h2><span class="icon">✏️</span> Editor de Cards</h2>
-        <p>Carrega o index.html para editar/excluir produtos existentes de forma segura.</p>
-    </a>
-    
-    <a href="gerador_mockup.html" class="card-link utilidade">
-        <h2><span class="icon">☕</span> Gerador de Mockup</h2>
-        <p>Aplica uma arte em duas canecas (esquerda/direita) e gera uma imagem de marketing.</p>
-    </a>
-    
-    <a href="reorganizador.html" class="card-link utilidade">... Reorganizador ...</a>
-    <a href="editor_geral.html" class="card-link editor">... Editor Geral ...</a>
-    <a href="utilidades_arquivo.html" class="card-link utilidade">... Backup & Limpeza ...</a>
-    
-    <a href="relatorios.html" class="card-link analise">... Relatórios e Stats ...</a>
-    <a href="checker_imagens.html" class="card-link analise">... Imagens Quebradas ...</a>
+        <a href="gerador.html" class="card-link criacao">
+            <h2><span class="icon">✨</span> Gerador de Cards</h2>
+            <p>Cria um novo produto e o insere no index.html. Possui upload ImgBB.</p>
+        </a>
 
-    </div>
-    
+        <a href="gerador_mockup.html" class="card-link criacao">
+            <h2><span class="icon">☕</span> Gerador de Mockup</h2>
+            <p>Aplica uma arte em duas canecas e gera uma imagem de marketing (API ImgBB).</p>
+        </a>
+
+        <a href="editor.html" class="card-link edicao">
+            <h2><span class="icon">✏️</span> Editor de Cards</h2>
+            <p>Carrega o index.html para editar/excluir produtos existentes de forma segura.</p>
+        </a>
+        
+        <a href="reorganizador.html" class="card-link edicao">
+            <h2><span class="icon">↕️</span> Reorganizador de Cards</h2>
+            <p>Permite arrastar e soltar os cards da galeria para mudar a ordem de exibição.</p>
+        </a>
+        
+        <a href="editor_geral.html" class="card-link edicao">
+            <h2><span class="icon">🌐</span> Editor de Metadados/Geral</h2>
+            <p>Edita o título da página, descrição (SEO) e outros textos fixos do seu index.html.</p>
+        </a>
+
+        <a href="utilidades_arquivo.html" class="card-link utilidade">
+            <h2><span class="icon">💾</span> Backup & Limpeza</h2>
+            <p>Cria um backup seguro do arquivo e remove espaços/linhas desnecessárias da galeria.</p>
+        </a>
+        
+        <a href="configuracoes.html" class="card-link utilidade">
+            <h2><span class="icon">⚙️</span> Configurações Padrão</h2>
+            <p>Define listas mestras de Categorias e Cores para o Gerador de Cards.</p>
+        </a>
+
+        <a href="relatorios.html" class="card-link analise">
+            <h2><span class="icon">📊</span> Relatórios e Stats</h2>
+            <p>Gera estatísticas do seu catálogo: contagem por categoria, preços min/máx, etc.</p>
+        </a>
+
+        <a href="checker_imagens.html" class="card-link analise">
+            <h2><span class="icon">⚠️</span> Imagens Quebradas</h2>
+            <p>Verifica todos os links de imagem dos cards para encontrar URLs quebradas.</p>
+        </a>
+        
+        </div>
 </body>
 </html>
