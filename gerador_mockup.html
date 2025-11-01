@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Mockup de Canecas</title>
     <style>
+        /* (Estilos omitidos por brevidade, são os mesmos da versão anterior) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
         body { background: #0d0d0d; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
         h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #ff6600; }
@@ -59,17 +60,14 @@
         const MUG_TEMPLATE_URL = "mug_template.jpg"; 
 
         // ------------------------------------------------------------------
-        // COORDENADAS AJUSTADAS PARA A IMAGEM FORNECIDA (1400x933 do template)
-        // Estas coordenadas agora se referem à área ONDE a metade da estampa será DESENHADA.
-        // x_destino, y_destino, largura_destino, altura_destino
+        // COORDENADAS AJUSTADAS PARA CENTRALIZAR MELHOR A ESTAMPA (Versão 2)
+        // [X_inicial, Y_inicial, Largura_final, Altura_final, Opacidade]
         // ------------------------------------------------------------------
         const MUG_MAPPING = [
-            // Caneca 1 (Alça para Esquerda - área de estampa visível na direita do objeto)
-            // Ajuste fino para a imagem de template 1400x933
-            { x: 340, y: 350, w: 250, h: 250, opacity: 0.95 }, 
-            // Caneca 2 (Alça para Direita - área de estampa visível na esquerda do objeto)
-            // Ajuste fino para a imagem de template 1400x933
-            { x: 910, y: 350, w: 250, h: 250, opacity: 0.95 }
+            // Caneca 1: Mover para cima (y=340), para a esquerda (x=330) e alargar (w=270, h=270)
+            { x: 330, y: 340, w: 270, h: 270, opacity: 0.95 }, 
+            // Caneca 2: Mover para cima (y=340), para a esquerda (x=900) e alargar (w=270, h=270)
+            { x: 900, y: 340, w: 270, h: 270, opacity: 0.95 }
         ];
         // ------------------------------------------------------------------
 
@@ -131,8 +129,6 @@
 
                     // Desenha a PRIMEIRA METADE (Frente) na Caneca 1
                     // drawImage(imagem, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-                    // sx, sy, sWidth, sHeight = área de recorte na imagem de ORIGEM
-                    // dx, dy, dWidth, dHeight = área de destino no CANVAS
                     ctx.save(); 
                     ctx.globalAlpha = MUG_MAPPING[0].opacity; 
                     ctx.drawImage(
@@ -168,7 +164,7 @@
         
         // 3. Lógica de Upload do Mockup Final para ImgBB
         async function uploadMockup() {
-            if (API_KEY_IMG_BB === "bb49178e11dff4322b7a699167535e57") {
+            if (API_KEY_IMG_BB === "SUA_CHAVE_API_AQUI") {
                 mostrarNotificacao("ERRO: Configure a Chave de API do ImgBB.", false);
                 return;
             }
